@@ -75,6 +75,31 @@
         text-transform: uppercase;
       }
 
+      .hero-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .language-toggle {
+        min-width: 44px;
+        padding: 8px 10px;
+        border: 1px solid rgba(11, 75, 58, 0.2);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--mint-dark);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .language-toggle:hover,
+      .language-toggle:focus-visible {
+        background: #fff;
+        outline: 3px solid rgba(22, 122, 90, 0.16);
+      }
+
       .mark {
         display: grid;
         width: 32px;
@@ -200,6 +225,8 @@
         margin-top: 14px;
       }
 
+      .results[hidden] { display: none; }
+
       .result-row {
         display: flex;
         align-items: center;
@@ -270,18 +297,21 @@
     <main class="shell">
       <section class="card" aria-labelledby="title">
         <header class="hero">
-          <div class="brandline"><span class="mark" aria-hidden="true">%</span> Québec invoice helper</div>
-          <h1 id="title">Add GST + QST without the calculator.</h1>
-          <p class="subtitle">Enter your amount before tax and get an invoice-ready breakdown in seconds.</p>
-          <div class="rates" aria-label="Tax rates">
-            <span class="rate">GST&nbsp; 5%</span>
-            <span class="rate">QST&nbsp; 9.975%</span>
+          <div class="hero-top">
+            <div class="brandline"><span class="mark" aria-hidden="true">%</span> <span id="brandline-text">Québec invoice helper</span></div>
+            <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch to French">FR</button>
+          </div>
+          <h1 id="title">GST + QST invoice calculator</h1>
+          <p class="subtitle" id="subtitle">Enter your amount before tax and get an invoice-ready breakdown in seconds.</p>
+          <div class="rates" id="tax-rates" aria-label="Tax rates">
+            <span class="rate"><span id="gst-rate-label">GST</span>&nbsp; 5%</span>
+            <span class="rate"><span id="qst-rate-label">QST</span>&nbsp; 9.975%</span>
           </div>
         </header>
 
         <div class="content">
           <form id="calculator-form" novalidate>
-            <label class="section-label" for="subtotal">Amount before tax</label>
+            <label class="section-label" id="amount-label" for="subtotal">Amount before tax</label>
             <div class="amount-row">
               <div class="input-wrap">
                 <span class="currency" aria-hidden="true">$</span>
@@ -294,40 +324,103 @@
 
           <section id="results" class="results" aria-live="polite" hidden>
             <div class="result-row">
-              <span class="result-name">Subtotal</span>
+              <span class="result-name" id="subtotal-label">Subtotal</span>
               <span class="result-value" id="subtotal-result">—</span>
             </div>
             <div class="result-row">
-              <span class="result-name">GST <span class="result-rate">5%</span></span>
+              <span class="result-name"><span id="gst-label">GST</span> <span class="result-rate">5%</span></span>
               <span class="result-value" id="gst-result">—</span>
             </div>
             <div class="result-row">
-              <span class="result-name">QST <span class="result-rate">9.975%</span></span>
+              <span class="result-name"><span id="qst-label">QST</span> <span class="result-rate">9.975%</span></span>
               <span class="result-value" id="qst-result">—</span>
             </div>
             <div class="result-row">
-              <span class="result-name">Total tax</span>
+              <span class="result-name" id="total-tax-label">Total tax</span>
               <span class="result-value" id="tax-result">—</span>
             </div>
             <div class="total">
-              <span class="result-name">Invoice total</span>
+              <span class="result-name" id="invoice-total-label">Invoice total</span>
               <span class="result-value" id="total-result">—</span>
             </div>
           </section>
 
           <p class="empty" id="empty-state">Your breakdown will appear here. GST and QST are calculated separately on the same pre-tax subtotal.</p>
-          <p class="note">For ordinary taxable supplies. Confirm special cases such as exempt, zero-rated, or tax-included amounts before issuing an invoice.</p>
+          <p class="note" id="note">For ordinary taxable supplies. Confirm special cases such as exempt, zero-rated, or tax-included amounts before issuing an invoice.</p>
         </div>
       </section>
     </main>
 
     <script>
+      const translations = {
+        en: {
+          locale: "en-CA",
+          pageTitle: "Québec GST + QST Invoice Calculator",
+          brandline: "Québec invoice helper",
+          title: "GST + QST invoice calculator",
+          subtitle: "Enter your amount before tax and get an invoice-ready breakdown in seconds.",
+          taxRates: "Tax rates",
+          amountLabel: "Amount before tax",
+          placeholder: "0.00",
+          calculate: "Calculate",
+          working: "Working…",
+          subtotal: "Subtotal",
+          gst: "GST",
+          qst: "QST",
+          totalTax: "Total tax",
+          invoiceTotal: "Invoice total",
+          empty: "Your breakdown will appear here. GST and QST are calculated separately on the same pre-tax subtotal.",
+          note: "For ordinary taxable supplies. Confirm special cases such as exempt, zero-rated, or tax-included amounts before issuing an invoice.",
+          invalid: "Enter a non-negative amount before tax.",
+          failed: "The calculation could not be completed. Try again.",
+          switchLabel: "Switch to French",
+          switchText: "FR",
+        },
+        fr: {
+          locale: "fr-CA",
+          pageTitle: "Calculateur de facture TPS + TVQ du Québec",
+          brandline: "Assistant de facturation du Québec",
+          title: "Calculateur de facture TPS + TVQ",
+          subtitle: "Entrez le montant avant taxes et obtenez en quelques secondes un détail prêt pour votre facture.",
+          taxRates: "Taux de taxation",
+          amountLabel: "Montant avant taxes",
+          placeholder: "0,00",
+          calculate: "Calculer",
+          working: "Calcul en cours…",
+          subtotal: "Sous-total",
+          gst: "TPS",
+          qst: "TVQ",
+          totalTax: "Total des taxes",
+          invoiceTotal: "Total de la facture",
+          empty: "Votre détail apparaîtra ici. La TPS et la TVQ sont calculées séparément sur le même sous-total avant taxes.",
+          note: "Pour les fournitures taxables ordinaires. Vérifiez les cas particuliers, comme les montants exonérés, détaxés ou taxes incluses, avant d’émettre une facture.",
+          invalid: "Entrez un montant avant taxes égal ou supérieur à zéro.",
+          failed: "Le calcul n’a pas pu être effectué. Réessayez.",
+          switchLabel: "Passer à l’anglais",
+          switchText: "EN",
+        },
+      };
+
       const form = document.getElementById("calculator-form");
       const amountInput = document.getElementById("subtotal");
       const calculateButton = document.getElementById("calculate");
       const message = document.getElementById("message");
       const results = document.getElementById("results");
       const emptyState = document.getElementById("empty-state");
+      const languageToggle = document.getElementById("language-toggle");
+      const brandlineText = document.getElementById("brandline-text");
+      const title = document.getElementById("title");
+      const subtitle = document.getElementById("subtitle");
+      const taxRates = document.getElementById("tax-rates");
+      const amountLabel = document.getElementById("amount-label");
+      const subtotalLabel = document.getElementById("subtotal-label");
+      const gstLabel = document.getElementById("gst-label");
+      const qstLabel = document.getElementById("qst-label");
+      const gstRateLabel = document.getElementById("gst-rate-label");
+      const qstRateLabel = document.getElementById("qst-rate-label");
+      const totalTaxLabel = document.getElementById("total-tax-label");
+      const invoiceTotalLabel = document.getElementById("invoice-total-label");
+      const note = document.getElementById("note");
 
       const outputFields = {
         subtotal: document.getElementById("subtotal-result"),
@@ -337,11 +430,67 @@
         total: document.getElementById("total-result"),
       };
 
-      const money = new Intl.NumberFormat(document.documentElement.lang || "en-CA", {
-        style: "currency",
-        currency: "CAD",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+      let currentLanguage = "en";
+      let money = createMoneyFormatter();
+      let latestResult = null;
+
+      function createMoneyFormatter() {
+        return new Intl.NumberFormat(translations[currentLanguage].locale, {
+          style: "currency",
+          currency: "CAD",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
+
+      function setLanguage(language, persist = true) {
+        currentLanguage = language === "fr" ? "fr" : "en";
+        const copy = translations[currentLanguage];
+
+        document.documentElement.lang = copy.locale;
+        document.title = copy.pageTitle;
+        brandlineText.textContent = copy.brandline;
+        title.textContent = copy.title;
+        subtitle.textContent = copy.subtitle;
+        taxRates.setAttribute("aria-label", copy.taxRates);
+        amountLabel.textContent = copy.amountLabel;
+        amountInput.placeholder = copy.placeholder;
+        calculateButton.textContent = copy.calculate;
+        subtotalLabel.textContent = copy.subtotal;
+        gstLabel.textContent = copy.gst;
+        qstLabel.textContent = copy.qst;
+        gstRateLabel.textContent = copy.gst;
+        qstRateLabel.textContent = copy.qst;
+        totalTaxLabel.textContent = copy.totalTax;
+        invoiceTotalLabel.textContent = copy.invoiceTotal;
+        emptyState.textContent = copy.empty;
+        note.textContent = copy.note;
+        languageToggle.textContent = copy.switchText;
+        languageToggle.setAttribute("aria-label", copy.switchLabel);
+        money = createMoneyFormatter();
+
+        if (persist) {
+          try {
+            window.localStorage.setItem("gst-qst-language", currentLanguage);
+          } catch {
+            // Local storage may be unavailable in a restricted iframe.
+          }
+        }
+
+        if (latestResult) render(latestResult);
+      }
+
+      let storedLanguage = null;
+      try {
+        storedLanguage = window.localStorage.getItem("gst-qst-language");
+      } catch {
+        // Local storage may be unavailable in a restricted iframe.
+      }
+
+      const hashLanguage = window.location.hash.toLowerCase() === "#fr" ? "fr" : null;
+      setLanguage(hashLanguage || (storedLanguage === "fr" ? "fr" : "en"), false);
+      languageToggle.addEventListener("click", () => {
+        setLanguage(currentLanguage === "en" ? "fr" : "en");
       });
 
       let requestId = 0;
@@ -411,6 +560,7 @@
           return;
         }
 
+        latestResult = result;
         outputFields.subtotal.textContent = money.format(result.subtotal);
         outputFields.gstAmount.textContent = money.format(result.gstAmount);
         outputFields.qstAmount.textContent = money.format(result.qstAmount);
@@ -422,7 +572,7 @@
 
       function setBusy(isBusy) {
         calculateButton.disabled = isBusy;
-        calculateButton.textContent = isBusy ? "Working…" : "Calculate";
+        calculateButton.textContent = isBusy ? translations[currentLanguage].working : translations[currentLanguage].calculate;
       }
 
       form.addEventListener("submit", async (event) => {
@@ -432,7 +582,7 @@
         const subtotal = Number(raw);
 
         if (!raw || !Number.isFinite(subtotal) || subtotal < 0) {
-          message.textContent = "Enter a non-negative amount before tax.";
+          message.textContent = translations[currentLanguage].invalid;
           amountInput.focus();
           return;
         }
@@ -455,7 +605,7 @@
           }
         } catch (error) {
           console.error("GST/QST calculation failed", error);
-          message.textContent = "The calculation could not be completed. Try again.";
+          message.textContent = translations[currentLanguage].failed;
         } finally {
           setBusy(false);
         }
