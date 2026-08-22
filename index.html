@@ -4,10 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="refresh" content="0; url=public/gst-qst-widget.html" />
-    <title>GST + QST calculator</title>
+    <title>Québec GST + QST Invoice Calculator</title>
   </head>
   <body>
     <p>Opening the GST + QST calculator…</p>
-    <p><a href="public/gst-qst-widget.html">Open the calculator</a></p>
+    <p><a id="open-calculator" href="public/gst-qst-widget.html">Open the calculator</a></p>
+    <script>
+      const calculatorUrl = `public/gst-qst-widget.html${window.location.hash}`;
+      document.getElementById("open-calculator").href = calculatorUrl;
+      window.location.replace(calculatorUrl);
+    </script>
   </body>
 </html>
