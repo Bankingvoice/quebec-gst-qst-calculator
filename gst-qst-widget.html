@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en-CA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#d8f3e6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="GST + QST" />
+    <title>GST + QST calculator</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17201f;
+        --muted: #6b7471;
+        --line: #dde4df;
+        --paper: #fbfcfa;
+        --mint: #d8f3e6;
+        --mint-strong: #167a5a;
+        --mint-dark: #0b4b3a;
+        --amber: #f3b85b;
+        --shadow: 0 18px 48px rgba(23, 32, 31, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-width: 300px;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      button, input { font: inherit; }
+
+      .shell {
+        width: min(100%, 560px);
+        margin: 0 auto;
+        padding: 22px;
+      }
+
+      .card {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: #fff;
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        position: relative;
+        padding: 26px 26px 22px;
+        background: var(--mint);
+      }
+
+      .hero::after {
+        position: absolute;
+        right: 22px;
+        bottom: -17px;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.34);
+        content: "";
+      }
+
+      .brandline {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--mint-dark);
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .mark {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border: 1px solid rgba(11, 75, 58, 0.16);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--mint-dark);
+        font-size: 16px;
+      }
+
+      h1 {
+        max-width: 390px;
+        margin: 20px 0 8px;
+        font-size: clamp(27px, 6vw, 40px);
+        line-height: 1.02;
+        letter-spacing: -0.045em;
+      }
+
+      .subtitle {
+        max-width: 390px;
+        margin: 0;
+        color: #35564c;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .rates {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .rate {
+        padding: 7px 10px;
+        border: 1px solid rgba(11, 75, 58, 0.16);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.64);
+        color: var(--mint-dark);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .content { padding: 26px; }
+
+      .section-label {
+        display: block;
+        margin-bottom: 9px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .amount-row {
+        display: flex;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .input-wrap {
+        position: relative;
+        flex: 1;
+      }
+
+      .currency {
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        color: var(--muted);
+        font-weight: 650;
+        transform: translateY(-50%);
+      }
+
+      input[type="number"] {
+        width: 100%;
+        height: 54px;
+        padding: 0 16px 0 42px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        outline: none;
+        background: #fff;
+        color: var(--ink);
+        font-size: 18px;
+        font-weight: 700;
+        transition: border-color 160ms ease, box-shadow 160ms ease;
+      }
+
+      input[type="number"]::placeholder { color: #a5afaa; }
+      input[type="number"]:focus {
+        border-color: var(--mint-strong);
+        box-shadow: 0 0 0 4px rgba(22, 122, 90, 0.12);
+      }
+
+      .calculate {
+        min-width: 124px;
+        border: 0;
+        border-radius: 14px;
+        background: var(--mint-dark);
+        color: #fff;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 750;
+        transition: transform 160ms ease, background 160ms ease;
+      }
+
+      .calculate:hover { background: #073b2e; transform: translateY(-1px); }
+      .calculate:disabled { cursor: wait; opacity: 0.64; transform: none; }
+
+      .message {
+        min-height: 20px;
+        margin: 9px 2px 0;
+        color: #a33c2f;
+        font-size: 12px;
+      }
+
+      .results {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .result-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .result-row:last-child { border-bottom: 0; }
+
+      .result-name { color: var(--muted); font-size: 14px; }
+      .result-rate { margin-left: 5px; color: #9aa49f; font-size: 11px; }
+      .result-value { font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 750; }
+
+      .total {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 6px;
+        padding: 18px;
+        border-radius: 16px;
+        background: #f0f8f4;
+      }
+
+      .total .result-name { color: var(--mint-dark); font-weight: 750; }
+      .total .result-value { color: var(--mint-dark); font-size: 25px; letter-spacing: -0.04em; }
+
+      .empty {
+        margin: 18px 0 0;
+        padding: 16px;
+        border: 1px dashed var(--line);
+        border-radius: 14px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .note {
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (max-width: 460px) {
+        .shell { padding: 10px; }
+        .hero, .content { padding: 22px 18px; }
+        .amount-row { flex-direction: column; }
+        .calculate { min-height: 48px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card" aria-labelledby="title">
+        <header class="hero">
+          <div class="brandline"><span class="mark" aria-hidden="true">%</span> Québec invoice helper</div>
+          <h1 id="title">Add GST + QST without the calculator.</h1>
+          <p class="subtitle">Enter your amount before tax and get an invoice-ready breakdown in seconds.</p>
+          <div class="rates" aria-label="Tax rates">
+            <span class="rate">GST&nbsp; 5%</span>
+            <span class="rate">QST&nbsp; 9.975%</span>
+          </div>
+        </header>
+
+        <div class="content">
+          <form id="calculator-form" novalidate>
+            <label class="section-label" for="subtotal">Amount before tax</label>
+            <div class="amount-row">
+              <div class="input-wrap">
+                <span class="currency" aria-hidden="true">$</span>
+                <input id="subtotal" name="subtotal" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" autocomplete="off" required />
+              </div>
+              <button class="calculate" id="calculate" type="submit">Calculate</button>
+            </div>
+            <p class="message" id="message" role="alert" aria-live="polite"></p>
+          </form>
+
+          <section id="results" class="results" aria-live="polite" hidden>
+            <div class="result-row">
+              <span class="result-name">Subtotal</span>
+              <span class="result-value" id="subtotal-result">—</span>
+            </div>
+            <div class="result-row">
+              <span class="result-name">GST <span class="result-rate">5%</span></span>
+              <span class="result-value" id="gst-result">—</span>
+            </div>
+            <div class="result-row">
+              <span class="result-name">QST <span class="result-rate">9.975%</span></span>
+              <span class="result-value" id="qst-result">—</span>
+            </div>
+            <div class="result-row">
+              <span class="result-name">Total tax</span>
+              <span class="result-value" id="tax-result">—</span>
+            </div>
+            <div class="total">
+              <span class="result-name">Invoice total</span>
+              <span class="result-value" id="total-result">—</span>
+            </div>
+          </section>
+
+          <p class="empty" id="empty-state">Your breakdown will appear here. GST and QST are calculated separately on the same pre-tax subtotal.</p>
+          <p class="note">For ordinary taxable supplies. Confirm special cases such as exempt, zero-rated, or tax-included amounts before issuing an invoice.</p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const form = document.getElementById("calculator-form");
+      const amountInput = document.getElementById("subtotal");
+      const calculateButton = document.getElementById("calculate");
+      const message = document.getElementById("message");
+      const results = document.getElementById("results");
+      const emptyState = document.getElementById("empty-state");
+
+      const outputFields = {
+        subtotal: document.getElementById("subtotal-result"),
+        gstAmount: document.getElementById("gst-result"),
+        qstAmount: document.getElementById("qst-result"),
+        totalTax: document.getElementById("tax-result"),
+        total: document.getElementById("total-result"),
+      };
+
+      const money = new Intl.NumberFormat(document.documentElement.lang || "en-CA", {
+        style: "currency",
+        currency: "CAD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+      let requestId = 0;
+      const pendingRequests = new Map();
+      const bridgeAvailable = window.parent !== window;
+      const bridgeReady = bridgeAvailable ? initializeBridge() : Promise.resolve();
+
+      function rpcNotify(method, params) {
+        window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*");
+      }
+
+      function rpcRequest(method, params) {
+        return new Promise((resolve, reject) => {
+          const id = ++requestId;
+          pendingRequests.set(id, { resolve, reject });
+          window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+        });
+      }
+
+      async function initializeBridge() {
+        await rpcRequest("ui/initialize", {
+          appInfo: { name: "gst-qst-widget", version: "0.1.0" },
+          appCapabilities: {},
+          protocolVersion: "2026-01-26",
+        });
+        rpcNotify("ui/notifications/initialized", {});
+      }
+
+      window.addEventListener("message", (event) => {
+        if (event.source !== window.parent) return;
+        const incoming = event.data;
+        if (!incoming || incoming.jsonrpc !== "2.0") return;
+
+        if (incoming.id !== undefined && pendingRequests.has(incoming.id)) {
+          const pending = pendingRequests.get(incoming.id);
+          pendingRequests.delete(incoming.id);
+          if (incoming.error) pending.reject(incoming.error);
+          else pending.resolve(incoming.result);
+          return;
+        }
+
+        if (incoming.method === "ui/notifications/tool-result") {
+          render(incoming.params?.structuredContent);
+        }
+      }, { passive: true });
+
+      function localCalculation(subtotal) {
+        const normalizedSubtotal = Math.round((subtotal + Number.EPSILON) * 100) / 100;
+        const gstAmount = Math.round((normalizedSubtotal * 0.05 + Number.EPSILON) * 100) / 100;
+        const qstAmount = Math.round((normalizedSubtotal * 0.09975 + Number.EPSILON) * 100) / 100;
+        const totalTax = Math.round((gstAmount + qstAmount + Number.EPSILON) * 100) / 100;
+        return {
+          subtotal: normalizedSubtotal,
+          gstAmount,
+          qstAmount,
+          totalTax,
+          total: Math.round((normalizedSubtotal + totalTax + Number.EPSILON) * 100) / 100,
+        };
+      }
+
+      function validNumber(value) {
+        return typeof value === "number" && Number.isFinite(value);
+      }
+
+      function render(result) {
+        if (!result || !validNumber(result.subtotal) || !validNumber(result.gstAmount) || !validNumber(result.qstAmount) || !validNumber(result.totalTax) || !validNumber(result.total)) {
+          return;
+        }
+
+        outputFields.subtotal.textContent = money.format(result.subtotal);
+        outputFields.gstAmount.textContent = money.format(result.gstAmount);
+        outputFields.qstAmount.textContent = money.format(result.qstAmount);
+        outputFields.totalTax.textContent = money.format(result.totalTax);
+        outputFields.total.textContent = money.format(result.total);
+        results.hidden = false;
+        emptyState.hidden = true;
+      }
+
+      function setBusy(isBusy) {
+        calculateButton.disabled = isBusy;
+        calculateButton.textContent = isBusy ? "Working…" : "Calculate";
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        message.textContent = "";
+        const raw = amountInput.value.trim().replace(",", ".");
+        const subtotal = Number(raw);
+
+        if (!raw || !Number.isFinite(subtotal) || subtotal < 0) {
+          message.textContent = "Enter a non-negative amount before tax.";
+          amountInput.focus();
+          return;
+        }
+
+        setBusy(true);
+        try {
+          let response;
+          if (bridgeAvailable) {
+            await bridgeReady;
+            response = await rpcRequest("tools/call", {
+              name: "calculate_gst_qst",
+              arguments: { subtotal },
+            });
+            render(response?.structuredContent);
+          } else if (window.openai?.callTool) {
+            response = await window.openai.callTool("calculate_gst_qst", { subtotal });
+            render(response?.structuredContent);
+          } else {
+            render(localCalculation(subtotal));
+          }
+        } catch (error) {
+          console.error("GST/QST calculation failed", error);
+          message.textContent = "The calculation could not be completed. Try again.";
+        } finally {
+          setBusy(false);
+        }
+      });
+
+      if (window.openai?.toolOutput) {
+        render(window.openai.toolOutput);
+      }
+    </script>
+  </body>
+</html>
