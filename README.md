@@ -10,7 +10,21 @@ This is a `vanilla-widget` app. It uses one read-only, idempotent MCP tool:
 
 - `calculate_gst_qst` — accepts a non-negative pre-tax subtotal in CAD and applies 5% GST plus 9.975% QST to that same subtotal. Each tax is rounded to the nearest cent before the total is calculated.
 
+The app also exposes a second read-only, idempotent MCP tool, `generate_speech`, for turning English or French passages into AI-generated audio.
+
 The widget uses the MCP Apps bridge (`ui/initialize`, `ui/notifications/tool-result`, and `tools/call`) first. It also supports `window.openai` as an additive ChatGPT compatibility path and has a browser-only local fallback for quick visual checks.
+
+## Bilingual English/French voice practice
+
+The app also includes a small text-to-speech instrument for language learners:
+
+- `generate_speech` accepts an English or French passage, a voice, and a slower/faster speed.
+- The `speech-widget.html` page provides listening, read-along, transcript hiding for dictation, MP3 download, a device-voice fallback, and a visual presentation mode with sentence highlighting and automatic scrolling.
+- The presentation mode is an in-browser visual board synchronized to the audio timeline. It is not a generated MP4 video, which keeps it faster and more useful for reading practice.
+- The cloud voice is generated server-side with OpenAI's `gpt-4o-mini-tts` model. The API key stays in the local `.env.local` file and is never placed in the browser or GitHub Pages.
+- The app visibly tells listeners that the generated voice is AI-generated.
+
+GitHub Pages can host the interface, but it cannot safely run the server-side TTS call. On GitHub Pages, the **Use device voice** button remains available. For the more natural cloud voice, run the MCP server locally or deploy the Node server to a backend host.
 
 ## Run locally
 
@@ -22,6 +36,8 @@ npm start
 ```
 
 The server listens on `http://localhost:8787/mcp` by default. `GET /` is a small health check, and `GET /calculator` serves the same widget as a standalone browser calculator. Set `PORT` to use another port.
+
+After the server is running, open `http://localhost:8787/speech` for the bilingual voice-practice page. The API key is read from `.env.local`; do not commit that file.
 
 Run the calculation tests with:
 
@@ -80,3 +96,7 @@ The app is intended for ordinary taxable supplies where the entered amount is be
 - `public/gst-qst-widget.html` — self-contained widget UI.
 - `test/calculator.test.js` — calculation tests.
 
+The voice-practice additions are:
+
+- `src/speech.js` — server-side OpenAI text-to-speech request and local environment loading.
+- `public/speech-widget.html` — bilingual listening, read-along, and dictation practice UI.
