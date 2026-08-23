@@ -1,6 +1,8 @@
 # Québec GST + QST calculator
 
-A small ChatGPT Apps SDK app for the recurring invoice task: enter a pre-tax amount and get the GST, QST, total tax, and final invoice total immediately.
+A small bilingual (English/French) ChatGPT Apps SDK app for the recurring invoice task: enter a pre-tax amount and get the GST/QST (TPS/TVQ), total tax, and final invoice total immediately.
+
+The standalone widget starts in English. Use the **FR** button to switch to French; the choice is remembered in the browser. You can also open the page with `#fr` at the end of the URL to start in French.
 
 ## App shape and tool plan
 
@@ -63,7 +65,7 @@ The repository includes a root `index.html` entry page, so GitHub Pages can host
 2. Open **Pages** under **Code and automation**.
 3. Under **Build and deployment**, choose **Deploy from a branch**.
 4. Choose the `main` branch and the `/ (root)` folder, then click **Save**.
-5. Share the published address, usually `https://YOUR-USERNAME.github.io/quebec-gst-qst-calculator/`.
+5. Share the published address, usually `https://YOUR-USERNAME.github.io/quebec-gst-qst-calculator/`. Add `#fr` to open the French version by default.
 
 This static link runs the calculator in the browser. It does not provide the `/mcp` endpoint for ChatGPT; the MCP server still needs a Node-compatible host or a running desktop tunnel.
 
@@ -77,3 +79,4 @@ The app is intended for ordinary taxable supplies where the entered amount is be
 - `src/calculator.js` — pure calculation logic.
 - `public/gst-qst-widget.html` — self-contained widget UI.
 - `test/calculator.test.js` — calculation tests.
+
